@@ -1,5 +1,5 @@
 # 💫 About Me: Hi! I am Shajith
-🛰️ I’m currently working on Web Development, Machine Learning, Data Science and App development<br><br>🤝 I’m looking to collaborate on open-source Java/C/Cpp/ Python tools, AI projects, and real-time web apps.<br><br>🧠 I’m looking for help with integrating Firebase with Java backend ,FrontEnd and DSA approaches in real-world apps.<br><br>🌱 I’m currently learning Frontend , Java , Web Dvelopment<br><br>💬 Ask me about Python, Java, C, Cpp, DSA, Firebase,SQL, GitHub workflow, or project structuring.<br><br>⚡ Fun fact: I enjoy turning simple ideas into actual working apps and love debugging more than coding 😄
+🛰️ I’m currently working on Web Development, Machine Learning, Data Science and App development<br><br>🤝 I’m looking to collaborate on open-source Java/C/Cpp/ Python tools, AI projects, and real-time web apps.<br><br>🧠 I’m looking for help with integrating Firebase with Java backend ,FrontEnd and DSA approaches in real-world apps.<br><br>🌱 I’m currently learning Frontend , Java , Web Dvelopment<br><br>💬 Ask me about Python, Java, C, Cpp, DSA, Firebase,SQL, GitHub workflow, or project structuring.<br><br>⚡ Fun fact: I enjoy turning simple ideas into actual working apps and love debugging more then coding 😄
 
 
 ## 🌐 Socials:
