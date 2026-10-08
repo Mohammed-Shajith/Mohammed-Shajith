@@ -5,7 +5,22 @@
 .anton{font-family:'Anton',sans-serif;text-transform:uppercase;font-weight:400}
 .marker{font-family:'Marker',cursive}
 .mono{font-family:'Mono',monospace;font-weight:700}
-.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block}
+.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block;position:relative;z-index:0}
+.blob::before{content:'';position:absolute;left:-6px;right:-8px;top:2px;bottom:-8px;background:var(--bg);z-index:-1;
+  animation:morph 7s ease-in-out infinite,jiggle 3.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes jiggle{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.07)}}
+@keyframes fillbar{0%{stroke-dasharray:0 999}45%,100%{stroke-dasharray:var(--to) 999}}
+.fillbar{animation:fillbar 5s cubic-bezier(.3,.7,.2,1) infinite;animation-delay:var(--d,0s)}
+@keyframes flow{to{stroke-dashoffset:-72}}
+.flow{animation:flow 1.8s linear infinite}
+@keyframes flicker{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.96,1.07) skewX(-3deg)}50%{transform:scale(1.03,.95) skewX(2deg)}75%{transform:scale(.98,1.05) skewX(3deg)}}
+.flicker{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes cool{0%,100%{transform:rotate(-14deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-2px)}}
+@keyframes ring{0%,100%{r:5}50%{r:7}}
+.pulse-ring{animation:ring 1.6s ease-in-out infinite}
+.cool{animation:cool 3s ease-in-out infinite}
+@keyframes glint{0%,60%{transform:translateX(-30px)}100%{transform:translateX(110px)}}
+.glint{animation:glint 3s ease-in-out infinite}
 .sec{display:flex;align-items:flex-end;gap:14px}
 .sec .t{font-family:'Anton',sans-serif;font-size:36px;color:#1530B8;text-transform:uppercase;line-height:1}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid #0B1A6E;border-radius:999px;background:#FBF6E8;font-size:14px;font-weight:500}

@@ -81,7 +81,22 @@ BASE_CSS = f"""
 .anton{{font-family:'Anton',sans-serif;text-transform:uppercase;font-weight:400}}
 .marker{{font-family:'Marker',cursive}}
 .mono{{font-family:'Mono',monospace;font-weight:700}}
-.num{{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:{NAVY};padding:6px 8px 0;display:inline-block}}
+.num{{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:{NAVY};padding:6px 8px 0;display:inline-block;position:relative;z-index:0}}
+.blob::before{{content:'';position:absolute;left:-6px;right:-8px;top:2px;bottom:-8px;background:var(--bg);z-index:-1;
+  animation:morph 7s ease-in-out infinite,jiggle 3.6s ease-in-out infinite;animation-delay:var(--d,0s)}}
+@keyframes jiggle{{0%,100%{{transform:rotate(-8deg) scale(1)}}50%{{transform:rotate(8deg) scale(1.07)}}}}
+@keyframes fillbar{{0%{{stroke-dasharray:0 999}}45%,100%{{stroke-dasharray:var(--to) 999}}}}
+.fillbar{{animation:fillbar 5s cubic-bezier(.3,.7,.2,1) infinite;animation-delay:var(--d,0s)}}
+@keyframes flow{{to{{stroke-dashoffset:-72}}}}
+.flow{{animation:flow 1.8s linear infinite}}
+@keyframes flicker{{0%,100%{{transform:scale(1,1) skewX(0)}}25%{{transform:scale(.96,1.07) skewX(-3deg)}}50%{{transform:scale(1.03,.95) skewX(2deg)}}75%{{transform:scale(.98,1.05) skewX(3deg)}}}}
+.flicker{{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}}
+@keyframes cool{{0%,100%{{transform:rotate(-14deg) translateY(0)}}50%{{transform:rotate(-8deg) translateY(-2px)}}}}
+@keyframes ring{{0%,100%{{r:5}}50%{{r:7}}}}
+.pulse-ring{{animation:ring 1.6s ease-in-out infinite}}
+.cool{{animation:cool 3s ease-in-out infinite}}
+@keyframes glint{{0%,60%{{transform:translateX(-30px)}}100%{{transform:translateX(110px)}}}}
+.glint{{animation:glint 3s ease-in-out infinite}}
 .sec{{display:flex;align-items:flex-end;gap:14px}}
 .sec .t{{font-family:'Anton',sans-serif;font-size:36px;color:{INK};text-transform:uppercase;line-height:1}}
 .pill{{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid {NAVY};border-radius:999px;background:{CREAM};font-size:14px;font-weight:500}}
@@ -140,6 +155,31 @@ def wave_squiggle(color, w=44, h=18):
 def star(color, size):
     return (f'<svg {SVGNS} width="{size}" height="{size}" viewBox="0 0 54 54" fill="none" stroke="{color}" '
             f'stroke-width="4" stroke-linecap="round"><path d="M27 4v46M4 27h46M11 11l32 32M43 11L11 43"/></svg>')
+
+
+def burst(color, size, points=12):
+    pts = []
+    for k in range(points * 2):
+        r = 50 if k % 2 == 0 else 34
+        a = math.pi * k / points
+        pts.append(f"{50 + r * math.sin(a):.1f},{50 - r * math.cos(a):.1f}")
+    return (f'<svg {SVGNS} width="{size}" height="{size}" viewBox="0 0 100 100">'
+            f'<polygon points="{" ".join(pts)}" fill="{color}" opacity="0.28"/></svg>')
+
+
+def flame(w):
+    return (f'<svg {SVGNS} width="{w}" height="{w * 80 / 60:.0f}" viewBox="0 0 60 80">'
+            '<path d="M30 2 C 36 18, 54 28, 54 50 C 54 66, 43 78, 30 78 C 17 78, 6 66, 6 50 C 6 38, 14 30, 18 22 C 20 32, 24 36, 28 38 C 26 26, 26 14, 30 2Z" fill="#F0441A"/>'
+            '<path d="M30 22 C 34 34, 47 41, 47 56 C 47 68, 39 76, 30 76 C 21 76, 13 68, 13 56 C 13 48, 18 43, 21 39 C 23 47, 26 50, 29 50 C 27 41, 27 31, 30 22Z" fill="#FF8A1A"/>'
+            '<path d="M30 44 C 33 53, 41 57, 41 65 C 41 72, 36 76, 30 76 C 24 76, 19 72, 19 65 C 19 60, 23 57, 26 54 C 27 58, 29 59, 30 58 C 29 53, 29 49, 30 44Z" fill="#FFD84A"/></svg>')
+
+
+def shades_svg(w):
+    return (f'<svg {SVGNS} width="{w}" height="{w / 3:.0f}" viewBox="0 0 96 32" fill="none">'
+            '<defs><clipPath id="lens"><path d="M8 7 H40 C42 7 43 9 42 12 L39 23 C37 28 33 30 27 30 H19 C12 30 8 26 7 20 L5 11 C5 8 6 7 8 7Z M56 7 H88 C90 7 91 8 91 11 L89 20 C88 26 84 30 77 30 H69 C63 30 59 28 57 23 L54 12 C53 9 54 7 56 7Z"/></clipPath></defs>'
+            '<path d="M1 9 H95" stroke="#0B1A6E" stroke-width="3.5" stroke-linecap="round"/>'
+            '<path d="M8 7 H40 C42 7 43 9 42 12 L39 23 C37 28 33 30 27 30 H19 C12 30 8 26 7 20 L5 11 C5 8 6 7 8 7Z M56 7 H88 C90 7 91 8 91 11 L89 20 C88 26 84 30 77 30 H69 C63 30 59 28 57 23 L54 12 C53 9 54 7 56 7Z" fill="#0B1A6E"/>'
+            '<g clip-path="url(#lens)"><g class="glint"><path d="M0 34 L14 0 H20 L6 34Z M10 34 L24 0 H27 L13 34Z" fill="#FFFFFF" opacity="0.55"/></g></g></svg>')
 
 
 def wavy_arrow(color):
@@ -201,7 +241,7 @@ def build_top():
 
 <div style="background:{CREAM};padding:30px 36px 44px;display:grid;grid-template-columns:1.1fr 1fr;gap:36px;position:relative">
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="sec"><span class="num" style="background:{SUN};border-radius:40% 55% 45% 60%">01</span><span class="t">Who am I?</span></div>
+    <div class="sec"><span class="num blob" style="--bg:{SUN};--d:-0.7s">01</span><span class="t">Who am I?</span></div>
     <p style="margin:0;font-size:15.5px;line-height:1.6">Artificial Intelligence student and developer focused on <b>Machine Learning</b>, <b>Data Engineering</b>, software development and intelligent applications.</p>
     <p style="margin:0;font-size:15.5px;line-height:1.6">I enjoy taking an idea from:</p>
     <div class="anton" style="display:flex;align-items:center;gap:8px;font-size:22px;letter-spacing:1px">
@@ -215,7 +255,7 @@ def build_top():
     </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:14px;position:relative">
-    <div class="sec"><span class="num" style="background:{SUN};border-radius:55% 40% 60% 45%">02</span><span class="t">Currently building</span></div>
+    <div class="sec"><span class="num blob" style="--bg:{SUN};--d:-1.4s">02</span><span class="t">Currently building</span></div>
     <div style="border:2.5px solid {NAVY};border-radius:22px 34px 20px 30px;background:#fff;padding:16px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:6px 6px 0 {NAVY}">
       <div class="mono" style="font-size:11px;color:{INK}">&gt; LIVE_FEED.status<span class="blink">_</span></div>
       {building}
@@ -231,7 +271,7 @@ def build_top():
   <span class="rise" style="position:absolute;left:470px;bottom:0;width:7px;height:7px;border-radius:50%;background:{CREAM};animation-delay:1.6s"></span>
   <span class="rise" style="position:absolute;left:640px;bottom:0;width:13px;height:13px;border-radius:50%;border:2px solid {CREAM};animation-delay:3s"></span>
   <span class="rise" style="position:absolute;left:800px;bottom:0;width:8px;height:8px;border-radius:50%;background:{SUN};animation-delay:2.2s"></span>
-  <div class="sec"><span class="num" style="color:{SUN};padding-left:0">03</span><span class="t" style="color:{SUN}">What I build</span><span class="marker" style="margin-left:auto;font-size:22px;color:{SUN}">~ ride the data wave</span></div>
+  <div class="sec"><span class="num blob" style="color:{SUN};--bg:#2C49D6;--d:-1.3s">03</span><span class="t" style="color:{SUN}">What I build</span><span class="marker" style="margin-left:auto;font-size:22px;color:{SUN}">~ ride the data wave</span></div>
   <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin-top:26px">
     {build_item('<path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 2V5a2 2 0 0 0-3-2z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 2"/>', 'AI APPLICATIONS', 'ML models &#8594; APIs &#8594; web &amp; mobile apps')}
     {build_item('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>', 'DATA SYSTEMS', 'Pipelines &#8594; validation &#8594; analytics')}
@@ -253,7 +293,7 @@ def build_projects():
     done = L * EXSY_PROGRESS
     body = f"""
 <div style="padding:30px 36px 36px;display:flex;flex-direction:column;gap:22px;position:relative">
-  <div class="sec"><span class="num" style="background:{CREAM};border-radius:45% 60% 40% 55%">04</span><span class="t">Featured projects</span>
+  <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-2.1s">04</span><span class="t">Featured projects</span>
     <span class="marker wiggle" style="font-size:26px;color:{INK};display:inline-block">&#8592;</span>
     <span class="floaty morph" style="width:22px;height:20px;background:{ORANGE};display:inline-block;margin-bottom:24px"></span>
     <span class="mono" style="margin-left:auto;font-size:12px;color:{INK}">ALL REPOS &#8594; BELOW</span></div>
@@ -280,7 +320,7 @@ def build_projects():
       <div style="font-size:13.5px;line-height:1.5">A personal productivity and automation platform.</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">{tags(["React Native", "FastAPI", "AI tools"], f"border:1.5px solid {NAVY}")}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:auto"><span class="chip" style="background:{INK};color:{CREAM}">BUILDING<span class="blink">...</span></span>
-        <svg {SVGNS} width="100" height="12" viewBox="0 0 100 12" fill="none"><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#E3DCC5" stroke-width="4" stroke-linecap="round"/><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="{INK}" stroke-width="4" stroke-linecap="round" stroke-dasharray="{done:.0f} 999"/></svg>
+        <svg {SVGNS} width="100" height="12" viewBox="0 0 100 12" fill="none"><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#E3DCC5" stroke-width="4" stroke-linecap="round"/><path class="fillbar" style="--to:{done:.0f}px" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="{INK}" stroke-width="4" stroke-linecap="round" stroke-dasharray="{done:.0f} 999"/><path class="flow" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 21"/></svg>
         <span class="mono" style="font-size:11px">{EXSY_PROGRESS * 100:.0f}%</span></div>
     </div>
   </div>
@@ -295,17 +335,22 @@ def build_stats(data):
         f'<span style="font-size:13.5px;font-weight:500;padding:6px 14px;border:2px solid {NAVY};border-radius:999px;'
         f'background:{INK if i % 5 == 0 else SUN if i % 7 == 3 else CREAM};color:{CREAM if i % 5 == 0 else NAVY}">{n}</span>'
         for i, n in enumerate(STACK))
-    weeks = data["weeks"]  # list of 7-day count lists, oldest first
-    contrib_week = [sum(w) for w in weeks]
-    commit_week = data["commit_weeks"]
+    days = data["days"]  # one list per week (oldest first) of [date, count]
+    weeks = [[c for _, c in w] for w in days]
+    # partial first/last weeks are scaled to a 7-day rate so the line doesn't dip at the edges
+    contrib_week = [sum(w) * 7 / len(w) for w in weeks]
+    commit_week = [v * 7 / len(w) for v, w in zip(data["commit_weeks"], weeks)]
     cw = 788
+    ncols = len(weeks)
+    colw = (cw - 3 * (ncols - 1)) / ncols
+    xs = [i * (colw + 3) + colw / 2 for i in range(ncols)]  # line points sit above their dot column
     peak = max(max(contrib_week), max(commit_week), 1)
     scaled_c = [v / peak for v in contrib_week]
     scaled_m = [v / peak for v in commit_week]
 
     # both lines share one scale
     def scaled_path(vals):
-        pts = [(i * cw / (len(vals) - 1), 104 - v * 96) for i, v in enumerate(vals)]
+        pts = [(xs[i], 104 - v * 88) for i, v in enumerate(vals)]
         d = f"M{pts[0][0]:.1f} {pts[0][1]:.1f}"
         for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
             mx = (x0 + x1) / 2
@@ -313,7 +358,21 @@ def build_stats(data):
         return d
     line = scaled_path(scaled_c)
     line2 = scaled_path(scaled_m)
-    area = line + f" L{cw} 112 L0 112 Z"
+    area = line + f" L{xs[-1]:.1f} 112 L{xs[0]:.1f} 112 Z"
+    pk = max(range(ncols), key=lambda i: contrib_week[i])
+    pk_x, pk_y = xs[pk], 104 - scaled_c[pk] * 88
+    pk_anchor = "end" if pk_x > cw - 140 else "start"
+    pk_dx = -10 if pk_anchor == "end" else 10
+    pk_label = f"peak week &#183; {round(contrib_week[pk])}"
+    flat = [(d, c) for w in days for d, c in w]
+    best_day = max(flat, key=lambda t: t[1])
+    fmt = lambda iso: dt.date.fromisoformat(iso).strftime("%d %b %Y")
+    months, last = [], None
+    for i, w in enumerate(days):
+        m = w[0][0][:7]
+        if m != last and (i > 0 or w[0][0][8:] <= "07"):
+            months.append((i, dt.date.fromisoformat(w[0][0]).strftime("%b")))
+        last = m
 
     # shade by quartiles of the distinct daily counts, so quiet 1-commit days and busy days look different
     levels = sorted({c for w in weeks for c in w if c > 0}) or [1]
@@ -326,28 +385,42 @@ def build_stats(data):
             return shades[0]
         return shades[1 + sum(c > t for t in cuts)]
 
-    ncols = len(weeks)
+    # place each day on its real weekday row (Sun..Sat), like GitHub's calendar
+    grid = [[None] * ncols for _ in range(7)]
+    for c, w in enumerate(days):
+        for d, v in w:
+            grid[(dt.date.fromisoformat(d).weekday() + 1) % 7][c] = (d, v)
     cells = []
     for r in range(7):
         for c in range(ncols):
-            v = weeks[c][r] if r < len(weeks[c]) else None
-            cells.append(f'<span style="width:100%;aspect-ratio:1/1;border-radius:50%;background:{"transparent" if v is None else shade(v)}"></span>')
+            cell = grid[r][c]
+            if cell is None:
+                cells.append('<span></span>')
+                continue
+            ring = f";box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}" if cell == best_day else ""
+            cells.append(f'<span style="width:100%;aspect-ratio:1/1;border-radius:50%;background:{shade(cell[1])}{ring}"></span>')
+    month_row = "".join(f'<span style="grid-column:{i + 1} / span 4;font-size:10px">{m.upper()}</span>' for i, m in months)
 
     updated = data["updated"]
     body = f"""
 <div style="padding:30px 36px 20px;display:grid;grid-template-columns:1fr 1fr;gap:34px;position:relative">
   <div style="display:flex;flex-direction:column;gap:16px">
-    <div class="sec"><span class="num" style="background:{CREAM};border-radius:60% 40% 55% 45%">05</span><span class="t">Tech stack</span></div>
+    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-2.8s">05</span><span class="t">Tech stack</span></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">{stack}</div>
     <div class="marker" style="font-size:17px;color:{INK};transform:rotate(-2deg)">&#8627; the boards in my quiver</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
-    <div class="sec"><span class="num" style="background:{CREAM};border-radius:45% 55% 40% 60%">06</span><span class="t">Swell report</span>
+    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-3.5s">06</span><span class="t">Swell report</span>
       <span class="spin-slow" style="display:inline-block;width:30px;height:30px;margin-bottom:30px">{star(ORANGE, 30)}</span></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
       <div style="background:{INK};color:{CREAM};border-radius:50% 50% 18px 18px;padding:18px 6px 14px;text-align:center"><div class="anton" style="font-size:38px;color:{SUN}">{data['commits']}</div><div class="mono" style="font-size:10.5px">COMMITS<br/>LAST YEAR</div></div>
-      <div style="background:{SUN};border:2.5px solid {NAVY};border-radius:50% 50% 18px 18px;padding:16px 6px 12px;text-align:center"><div class="anton" style="font-size:38px">{data['current_streak']}<span style="font-size:18px"> d</span></div><div class="mono" style="font-size:10.5px">CURRENT<br/>STREAK</div></div>
-      <div style="background:{CREAM};border:2.5px solid {NAVY};border-radius:50% 50% 18px 18px;padding:16px 6px 12px;text-align:center"><div class="anton" style="font-size:38px;color:{INK}">{data['best_streak']}<span style="font-size:18px"> d</span></div><div class="mono" style="font-size:10.5px">BEST<br/>STREAK</div></div>
+      <div style="background:{SUN};border:2.5px solid {NAVY};border-radius:50% 50% 18px 18px;padding:16px 6px 12px;text-align:center;position:relative;overflow:hidden">
+        <div class="spin-slow" style="position:absolute;left:50%;top:-8px;margin-left:-46px;width:92px;height:92px">{burst(ORANGE, 92)}</div>
+        <div class="flicker" style="position:absolute;left:50%;top:-4px;margin-left:-22px;width:44px;height:59px">{flame(44)}</div>
+        <div class="anton" style="font-size:38px;position:relative;z-index:1;text-shadow:0 0 6px {SUN},0 0 2px {SUN}">{data['current_streak']}<span style="font-size:18px"> d</span></div><div class="mono" style="font-size:10.5px">CURRENT<br/>STREAK</div></div>
+      <div style="background:{CREAM};border:2.5px solid {NAVY};border-radius:50% 50% 18px 18px;padding:16px 6px 12px;text-align:center;position:relative">
+        <div class="anton" style="font-size:38px;color:{INK};position:relative">{data['best_streak']}<span style="font-size:18px"> d</span>
+          <div class="cool" style="position:absolute;left:50%;top:-23px;margin-left:-30px;width:72px;height:24px;z-index:2">{shades_svg(72)}</div></div><div class="mono" style="font-size:10.5px">BEST<br/>STREAK</div></div>
     </div>
     <div class="mono" style="display:flex;justify-content:space-between;font-size:11.5px;border-top:2px solid {NAVY};padding-top:10px">
       <span>CONTRIBS &#183; {data['contributions']}</span><span>PRs &#183; {data['prs']}</span><span>TOP LANG &#183; {data['top_lang']}</span></div>
@@ -360,8 +433,13 @@ def build_stats(data):
     <path d="{area}" fill="{INK}" opacity="0.16"/>
     <path d="{line}" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
     <path class="march" d="{line2}" stroke="{ORANGE}" stroke-width="2.2" stroke-dasharray="5 5"/>
+    <line x1="{pk_x:.1f}" y1="{pk_y:.1f}" x2="{pk_x:.1f}" y2="112" stroke="{NAVY}" stroke-width="1" stroke-dasharray="2 3"/>
+    <circle class="pulse-ring" cx="{pk_x:.1f}" cy="{pk_y:.1f}" r="5" fill="{SUN}" stroke="{NAVY}" stroke-width="2"/>
+    <text x="{pk_x + pk_dx:.1f}" y="{max(pk_y - 2, 12):.1f}" text-anchor="{pk_anchor}" font-family="Mono" font-weight="700" font-size="10.5" fill="{NAVY}">{pk_label}</text>
   </svg>
+  <div class="mono" style="display:grid;grid-template-columns:repeat({ncols},minmax(0,1fr));gap:3px;color:{INK};margin-bottom:-4px">{month_row}</div>
   <div style="display:grid;grid-template-columns:repeat({ncols},minmax(0,1fr));gap:3px">{''.join(cells)}</div>
+  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>busiest day &#183; {fmt(best_day[0])} &#183; {best_day[1]} contributions</div>
   <div class="mono" style="display:flex;gap:18px;font-size:11px;align-items:center">
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:3px;background:{INK}"></span>contributions / week</span>
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:2px dashed {ORANGE}"></span>commits / week</span>
@@ -379,17 +457,18 @@ def build_learning():
         f'<div style="display:grid;grid-template-columns:140px 1fr;align-items:center;gap:12px;font-size:14px;font-weight:500"><span>{n}</span>'
         f'<svg {SVGNS} width="220" height="14" viewBox="0 0 220 14" fill="none">'
         f'<path d="M3 7 C 20 1, 37 13, 55 7 S 92 1, 110 7 S 147 13, 165 7 S 200 1, 217 7" stroke="{CREAM}" stroke-width="6" stroke-linecap="round"/>'
-        f'<path d="M3 7 C 20 1, 37 13, 55 7 S 92 1, 110 7 S 147 13, 165 7 S 200 1, 217 7" stroke="{INK}" stroke-width="6" stroke-linecap="round" stroke-dasharray="{L * f:.0f} 999"/></svg></div>'
-        for n, f in LEARNING)
+        f'<path class="fillbar" style="--to:{L * f:.0f}px;--d:{i * 0.35:.2f}s" d="M3 7 C 20 1, 37 13, 55 7 S 92 1, 110 7 S 147 13, 165 7 S 200 1, 217 7" stroke="{INK}" stroke-width="6" stroke-linecap="round" stroke-dasharray="{L * f:.0f} 999"/>'
+        f'<path class="flow" d="M3 7 C 20 1, 37 13, 55 7 S 92 1, 110 7 S 147 13, 165 7 S 200 1, 217 7" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 32"/></svg></div>'
+        for i, (n, f) in enumerate(LEARNING))
     body = f"""
 <div style="padding:30px 36px 0;display:grid;grid-template-columns:1fr 1fr;gap:34px;position:relative;height:100%;background:{SUN}">
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="sec"><span class="num" style="padding-left:0">07</span><span class="t" style="font-size:32px">Currently learning</span></div>
+    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-2.1s">07</span><span class="t" style="font-size:32px">Currently learning</span></div>
     {rows}
     <div class="marker" style="font-size:17px;transform:rotate(-3deg);margin-top:4px">"a little progress each day."</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px;position:relative">
-    <div class="sec"><span class="num" style="padding-left:0">08</span><span class="t" style="font-size:32px">Let's connect</span></div>
+    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-0.4s">08</span><span class="t" style="font-size:32px">Let's connect</span></div>
     <div class="marker" style="font-size:36px;line-height:1.05;color:{NAVY};transform:rotate(-5deg);margin-top:8px">Let's build<br/>something cool.</div>
     <div class="mono" style="font-size:12px;color:{INK};display:flex;align-items:center;gap:8px">LINKS JUST BELOW <span class="bob" style="display:inline-block">&#8595;</span></div>
     <div class="glide" style="position:absolute;right:30px;top:150px">{wave_squiggle(NAVY)}</div>
@@ -431,7 +510,7 @@ def build_button(name, label, bg, fg, border):
 
 TOP_H = 1292
 PROJECTS_H = 448
-STATS_H = 724
+STATS_H = 776
 LEARNING_H = 330
 
 # ================================================================== data ===
@@ -481,7 +560,8 @@ def streaks(days):
 def fetch_live(token):
     u = gql(token, QUERY_MAIN, {"login": LOGIN})
     cc = u["contributionsCollection"]
-    weeks = [[d["contributionCount"] for d in w["contributionDays"]] for w in cc["contributionCalendar"]["weeks"]]
+    days = [[[d["date"], d["contributionCount"]] for d in w["contributionDays"]] for w in cc["contributionCalendar"]["weeks"]]
+    weeks = days
     week_starts = [w["contributionDays"][0]["date"] for w in cc["contributionCalendar"]["weeks"]]
 
     # commits per week, fetched month by month so no repo hits the 100-day page limit
@@ -527,7 +607,7 @@ def fetch_live(token):
         "contributions": cc["contributionCalendar"]["totalContributions"],
         "prs": cc["totalPullRequestContributions"],
         "current_streak": current, "best_streak": best, "top_lang": top_lang,
-        "weeks": weeks, "commit_weeks": commit_weeks,
+        "days": days, "commit_weeks": commit_weeks,
         "updated": now.strftime("%d %b %Y, %H:%M UTC"),
     }
 
@@ -539,8 +619,10 @@ def sample_data():
         wave = 0.5 + 0.5 * math.sin(i / 4.2)
         weeks.append([max(0, int(rnd.random() * 6 * wave + rnd.random() * 2 - 0.6)) for _ in range(7)])
     weeks[-1] = weeks[-1][:4]
+    start = dt.date(2025, 10, 5)  # a Sunday
+    days = [[[(start + dt.timedelta(days=7 * i + j)).isoformat(), c] for j, c in enumerate(w)] for i, w in enumerate(weeks)]
     return {"commits": 717, "contributions": sum(map(sum, weeks)), "prs": 0, "current_streak": 5, "best_streak": 21,
-            "top_lang": "Python", "weeks": weeks, "commit_weeks": [int(sum(w) * 0.8) for w in weeks],
+            "top_lang": "Python", "days": days, "commit_weeks": [int(sum(w) * 0.8) for w in weeks],
             "updated": "sample data"}
 
 

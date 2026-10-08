@@ -5,7 +5,22 @@
 .anton{font-family:'Anton',sans-serif;text-transform:uppercase;font-weight:400}
 .marker{font-family:'Marker',cursive}
 .mono{font-family:'Mono',monospace;font-weight:700}
-.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block}
+.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block;position:relative;z-index:0}
+.blob::before{content:'';position:absolute;left:-6px;right:-8px;top:2px;bottom:-8px;background:var(--bg);z-index:-1;
+  animation:morph 7s ease-in-out infinite,jiggle 3.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes jiggle{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.07)}}
+@keyframes fillbar{0%{stroke-dasharray:0 999}45%,100%{stroke-dasharray:var(--to) 999}}
+.fillbar{animation:fillbar 5s cubic-bezier(.3,.7,.2,1) infinite;animation-delay:var(--d,0s)}
+@keyframes flow{to{stroke-dashoffset:-72}}
+.flow{animation:flow 1.8s linear infinite}
+@keyframes flicker{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.96,1.07) skewX(-3deg)}50%{transform:scale(1.03,.95) skewX(2deg)}75%{transform:scale(.98,1.05) skewX(3deg)}}
+.flicker{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes cool{0%,100%{transform:rotate(-14deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-2px)}}
+@keyframes ring{0%,100%{r:5}50%{r:7}}
+.pulse-ring{animation:ring 1.6s ease-in-out infinite}
+.cool{animation:cool 3s ease-in-out infinite}
+@keyframes glint{0%,60%{transform:translateX(-30px)}100%{transform:translateX(110px)}}
+.glint{animation:glint 3s ease-in-out infinite}
 .sec{display:flex;align-items:flex-end;gap:14px}
 .sec .t{font-family:'Anton',sans-serif;font-size:36px;color:#1530B8;text-transform:uppercase;line-height:1}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid #0B1A6E;border-radius:999px;background:#FBF6E8;font-size:14px;font-weight:500}
@@ -42,7 +57,7 @@
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style><div class="root" style="height:448px">
 <div style="padding:30px 36px 36px;display:flex;flex-direction:column;gap:22px;position:relative">
-  <div class="sec"><span class="num" style="background:#FBF6E8;border-radius:45% 60% 40% 55%">04</span><span class="t">Featured projects</span>
+  <div class="sec"><span class="num blob" style="--bg:#FBF6E8;--d:-2.1s">04</span><span class="t">Featured projects</span>
     <span class="marker wiggle" style="font-size:26px;color:#1530B8;display:inline-block">&#8592;</span>
     <span class="floaty morph" style="width:22px;height:20px;background:#FF6B1A;display:inline-block;margin-bottom:24px"></span>
     <span class="mono" style="margin-left:auto;font-size:12px;color:#1530B8">ALL REPOS &#8594; BELOW</span></div>
@@ -69,7 +84,7 @@
       <div style="font-size:13.5px;line-height:1.5">A personal productivity and automation platform.</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1.5px solid #0B1A6E">React Native</span><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1.5px solid #0B1A6E">FastAPI</span><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;border:1.5px solid #0B1A6E">AI tools</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:auto"><span class="chip" style="background:#1530B8;color:#FBF6E8">BUILDING<span class="blink">...</span></span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="12" viewBox="0 0 100 12" fill="none"><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#E3DCC5" stroke-width="4" stroke-linecap="round"/><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#1530B8" stroke-width="4" stroke-linecap="round" stroke-dasharray="67 999"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="12" viewBox="0 0 100 12" fill="none"><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#E3DCC5" stroke-width="4" stroke-linecap="round"/><path class="fillbar" style="--to:67px" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#1530B8" stroke-width="4" stroke-linecap="round" stroke-dasharray="67 999"/><path class="flow" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 21"/></svg>
         <span class="mono" style="font-size:11px">70%</span></div>
     </div>
   </div>

@@ -5,7 +5,22 @@
 .anton{font-family:'Anton',sans-serif;text-transform:uppercase;font-weight:400}
 .marker{font-family:'Marker',cursive}
 .mono{font-family:'Mono',monospace;font-weight:700}
-.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block}
+.num{font-family:'Anton',sans-serif;font-size:78px;line-height:0.8;color:#0B1A6E;padding:6px 8px 0;display:inline-block;position:relative;z-index:0}
+.blob::before{content:'';position:absolute;left:-6px;right:-8px;top:2px;bottom:-8px;background:var(--bg);z-index:-1;
+  animation:morph 7s ease-in-out infinite,jiggle 3.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes jiggle{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.07)}}
+@keyframes fillbar{0%{stroke-dasharray:0 999}45%,100%{stroke-dasharray:var(--to) 999}}
+.fillbar{animation:fillbar 5s cubic-bezier(.3,.7,.2,1) infinite;animation-delay:var(--d,0s)}
+@keyframes flow{to{stroke-dashoffset:-72}}
+.flow{animation:flow 1.8s linear infinite}
+@keyframes flicker{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.96,1.07) skewX(-3deg)}50%{transform:scale(1.03,.95) skewX(2deg)}75%{transform:scale(.98,1.05) skewX(3deg)}}
+.flicker{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes cool{0%,100%{transform:rotate(-14deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-2px)}}
+@keyframes ring{0%,100%{r:5}50%{r:7}}
+.pulse-ring{animation:ring 1.6s ease-in-out infinite}
+.cool{animation:cool 3s ease-in-out infinite}
+@keyframes glint{0%,60%{transform:translateX(-30px)}100%{transform:translateX(110px)}}
+.glint{animation:glint 3s ease-in-out infinite}
 .sec{display:flex;align-items:flex-end;gap:14px}
 .sec .t{font-family:'Anton',sans-serif;font-size:36px;color:#1530B8;text-transform:uppercase;line-height:1}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid #0B1A6E;border-radius:999px;background:#FBF6E8;font-size:14px;font-weight:500}
@@ -75,7 +90,7 @@
 
 <div style="background:#FBF6E8;padding:30px 36px 44px;display:grid;grid-template-columns:1.1fr 1fr;gap:36px;position:relative">
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="sec"><span class="num" style="background:#FFD21F;border-radius:40% 55% 45% 60%">01</span><span class="t">Who am I?</span></div>
+    <div class="sec"><span class="num blob" style="--bg:#FFD21F;--d:-0.7s">01</span><span class="t">Who am I?</span></div>
     <p style="margin:0;font-size:15.5px;line-height:1.6">Artificial Intelligence student and developer focused on <b>Machine Learning</b>, <b>Data Engineering</b>, software development and intelligent applications.</p>
     <p style="margin:0;font-size:15.5px;line-height:1.6">I enjoy taking an idea from:</p>
     <div class="anton" style="display:flex;align-items:center;gap:8px;font-size:22px;letter-spacing:1px">
@@ -89,7 +104,7 @@
     </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:14px;position:relative">
-    <div class="sec"><span class="num" style="background:#FFD21F;border-radius:55% 40% 60% 45%">02</span><span class="t">Currently building</span></div>
+    <div class="sec"><span class="num blob" style="--bg:#FFD21F;--d:-1.4s">02</span><span class="t">Currently building</span></div>
     <div style="border:2.5px solid #0B1A6E;border-radius:22px 34px 20px 30px;background:#fff;padding:16px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:6px 6px 0 #0B1A6E">
       <div class="mono" style="font-size:11px;color:#1530B8">&gt; LIVE_FEED.status<span class="blink">_</span></div>
       <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;font-size:16px">exsy</span><span style="flex:1;border-bottom:2px dotted #0B1A6E"></span><span class="chip" style="background:#FFD21F;color:#0B1A6E">IN DEVELOPMENT</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;font-size:16px">Data Intelligence Systems</span><span style="flex:1;border-bottom:2px dotted #0B1A6E"></span><span class="chip" style="background:#1530B8;color:#FBF6E8">ACTIVE</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;font-size:16px">AI / ML Projects</span><span style="flex:1;border-bottom:2px dotted #0B1A6E"></span><span class="chip" style="background:#1530B8;color:#FBF6E8">ACTIVE</span></div>
@@ -105,7 +120,7 @@
   <span class="rise" style="position:absolute;left:470px;bottom:0;width:7px;height:7px;border-radius:50%;background:#FBF6E8;animation-delay:1.6s"></span>
   <span class="rise" style="position:absolute;left:640px;bottom:0;width:13px;height:13px;border-radius:50%;border:2px solid #FBF6E8;animation-delay:3s"></span>
   <span class="rise" style="position:absolute;left:800px;bottom:0;width:8px;height:8px;border-radius:50%;background:#FFD21F;animation-delay:2.2s"></span>
-  <div class="sec"><span class="num" style="color:#FFD21F;padding-left:0">03</span><span class="t" style="color:#FFD21F">What I build</span><span class="marker" style="margin-left:auto;font-size:22px;color:#FFD21F">~ ride the data wave</span></div>
+  <div class="sec"><span class="num blob" style="color:#FFD21F;--bg:#2C49D6;--d:-1.3s">03</span><span class="t" style="color:#FFD21F">What I build</span><span class="marker" style="margin-left:auto;font-size:22px;color:#FFD21F">~ ride the data wave</span></div>
   <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin-top:26px">
     <div style="display:flex;flex-direction:column;gap:8px"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD21F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 2V5a2 2 0 0 0-3-2z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 2"/></svg><b class="mono" style="font-size:13px">AI APPLICATIONS</b><span style="font-size:13px;opacity:.88">ML models &#8594; APIs &#8594; web &amp; mobile apps</span></div>
     <div style="display:flex;flex-direction:column;gap:8px"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD21F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><b class="mono" style="font-size:13px">DATA SYSTEMS</b><span style="font-size:13px;opacity:.88">Pipelines &#8594; validation &#8594; analytics</span></div>
