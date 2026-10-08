@@ -465,18 +465,28 @@ def build_stats(data):
             flex_days.append((d, v))
     ARM = "#F26A1B"
     # a right arm flexing: drawn facing right, then mirrored so the fist sits on the viewer's left like a real right-arm flex
-    ol = f'stroke="{NAVY}" stroke-width="1.4"'
-    knuckles = "".join(f'<circle cx="21.6" cy="{y}" r="2.1" fill="{ARM}" {ol}/>' for y in (7.2, 10.2, 13.2, 16.0))
-    arm = (f'<svg {SVGNS} width="34" height="34" viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round" style="overflow:visible">'
-           f'<g transform="translate(40 0) scale(-1 1)"><g class="shake">'
-           f'<g class="pow" stroke="{NAVY}" stroke-width="2"><path d="M8 13 L5 8.5"/><path d="M13 11.5 L13 5.5"/><path d="M18 13 L21 8.5"/></g>'
-           f'<path d="M2 24.5 L22 24.5 Q27 24.5 27 30 Q27 35.5 22 35.5 L2 35.5" fill="{ARM}" {ol}/>'
-           f'<ellipse class="bicep" cx="12.5" cy="24.5" rx="8" ry="6" fill="{ARM}" {ol}/>'
-           f'<g class="forearm">'
-           f'<path d="M20 32 L23.5 16 L31.5 16 L28.5 32 Z" fill="{ARM}" {ol}/>'
-           f'<rect x="22" y="5" width="12" height="13" rx="3.6" fill="{ARM}" {ol}/>{knuckles}'
-           f'<path d="M23.5 17 Q 28 18.5 32.5 14.5" {ol}/>'
-           f'</g></g></g></svg>')
+    # line-art flexed bicep (traced in a 750-unit grid, scaled to 100), mirrored into a right arm
+    k = 1 / 7.5
+    def P(d):
+        import re as _re
+        return _re.sub(r"-?\d+(?:\.\d+)?", lambda m: f"{float(m.group()) * k:.2f}", d)
+    fill_shape = P("M180 685 L180 390 C260 380 320 395 360 430 C430 440 500 460 560 505 L480 280 "
+                   "C400 310 370 315 350 295 C325 270 330 200 360 155 L515 165 L715 560 "
+                   "C650 650 450 700 350 650 C300 670 240 690 180 685 Z")
+    outer = P("M180 685 C240 690 300 670 350 650 C450 700 650 650 715 560 L515 165 L360 155 "
+              "C335 160 322 225 332 268 C337 285 345 293 360 298 C385 305 420 295 480 280 L535 470")
+    thumb = P("M365 238 C380 245 385 255 372 266 L345 282")
+    upper = P("M180 390 C255 380 320 395 362 432")
+    bicep = P("M295 462 C360 420 470 418 560 505")
+    under = P("M340 550 C385 578 450 582 500 562")
+    lw = 'stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" fill="none"'
+    arm = (f'<svg {SVGNS} width="34" height="34" viewBox="10 10 90 90" overflow="visible">'
+           f'<g transform="translate(110 0) scale(-1 1)"><g class="tense">'
+           f'<g class="pow" stroke="{ORANGE}" stroke-width="5" stroke-linecap="round"><path d="M27 47 L23 41"/><path d="M34 45 L34 37"/><path d="M41 47 L44 41"/></g>'
+           f'<path d="{fill_shape}" fill="{CREAM}"/>'
+           f'<path d="{outer}" stroke="{NAVY}" {lw}/><path d="{thumb}" stroke="{NAVY}" {lw}/><path d="{upper}" stroke="{NAVY}" {lw}/>'
+           f'<g class="bicep"><path d="{bicep}" fill="{CREAM}" stroke="{NAVY}" {lw.replace('fill="none"', "")}/><path d="{under}" stroke="{NAVY}" {lw}/></g>'
+           f'</g></g></svg>')
     flexers = ""
     for k, (d, v) in enumerate(flex_days):
         x, y = pos[d]
@@ -504,14 +514,12 @@ def build_stats(data):
                 "@keyframes fxb{0%,33%{opacity:0}38%,62%{opacity:1}67%,100%{opacity:0}}"
                 "@keyframes fxc{0%,65%{opacity:0}70%,92%{opacity:1}97%,100%{opacity:0}}"
                 ".fx-a{animation:fxa 6s infinite}.fx-b{animation:fxb 6s infinite}.fx-c{animation:fxc 6s infinite}"
-                "@keyframes curl{0%,100%{transform:rotate(30deg)}45%,60%{transform:rotate(-10deg)}}"
-                ".forearm{transform-origin:24px 31px;transform-box:view-box;animation:curl 1s ease-in-out infinite}"
-                "@keyframes bulge{0%,100%{transform:scale(.7,.7)}45%,60%{transform:scale(1.3,1.35)}}"
-                ".bicep{transform-origin:12.5px 30px;transform-box:view-box;animation:bulge 1s ease-in-out infinite}"
-                "@keyframes pow{0%,35%,75%,100%{opacity:0;transform:scale(.6)}50%,60%{opacity:1;transform:scale(1)}}"
-                ".pow{transform-origin:13px 12px;transform-box:view-box;animation:pow 1s ease-in-out infinite}"
-                "@keyframes shake{0%,40%,70%,100%{transform:translate(0,0)}47%{transform:translate(-1px,0)}53%{transform:translate(1px,0)}58%{transform:translate(-1px,0)}}"
-                ".shake{animation:shake 1s linear infinite}"
+                "@keyframes bulge{0%,100%{transform:scale(1,.82)}40%,62%{transform:scale(1.06,1.22)}}"
+                ".bicep{transform-box:view-box;transform-origin:57px 72px;animation:bulge 1.6s cubic-bezier(.65,0,.35,1) infinite}"
+                "@keyframes tense{0%,100%{transform:rotate(0deg)}40%,62%{transform:rotate(-3deg) scale(1.03)}48%{transform:rotate(-2deg) scale(1.03) translateX(.4px)}55%{transform:rotate(-3.5deg) scale(1.03) translateX(-.4px)}}"
+                ".tense{transform-box:view-box;transform-origin:80px 85px;animation:tense 1.6s cubic-bezier(.65,0,.35,1) infinite}"
+                "@keyframes pow{0%,32%{opacity:0;transform:scale(.6)}46%,60%{opacity:1;transform:scale(1)}78%,100%{opacity:0;transform:scale(1.15)}}"
+                ".pow{transform-box:view-box;transform-origin:34px 44px;animation:pow 1.6s ease-out infinite}"
                 "@keyframes pop{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}"
                 ".flexpop{animation:pop 1.6s ease-in-out infinite}")
 
