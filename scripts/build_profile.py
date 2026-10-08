@@ -342,7 +342,7 @@ def build_stats(data):
     commit_week = [v * 7 / len(w) for v, w in zip(data["commit_weeks"], weeks)]
     cw = 758                      # inner width of the tide card
     ncols = len(weeks)
-    LW = 30                       # weekday label column
+    LW = 0
     pitch = (cw - LW) / ncols     # one dot column
     dot = pitch - 3
     TIP, CH, MR = 50, 112, 18     # tooltip strip, chart height, month-label row
@@ -399,7 +399,7 @@ def build_stats(data):
     dots = "".join(
         f'<span style="position:absolute;left:{pos[d][0]:.1f}px;top:{pos[d][1]:.1f}px;width:{dot:.1f}px;height:{dot:.1f}px;'
         f'border-radius:50%;background:{shade(v)}'
-        + (f';box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}' if d in top3_dates else '') + '"></span>'
+        + (f';box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}' if (d, v) == best_day else '') + '"></span>'
         for d, v in flat)
     wk = "".join(f'<span class="mono" style="position:absolute;left:0;top:{gy + r * pitch - 1:.1f}px;font-size:9.5px;line-height:{dot:.0f}px">{n}</span>'
                  for r, n in ((1, "MON"), (3, "WED"), (5, "FRI")))
@@ -483,7 +483,6 @@ def build_stats(data):
 </div>
 <div style="margin:6px 36px 0;border:2.5px solid {NAVY};border-radius:28px 20px 34px 22px;background:{CREAM};padding:20px 22px;display:flex;flex-direction:column;gap:12px;position:relative">
   <div style="display:flex;justify-content:space-between;align-items:center"><span class="anton" style="font-size:24px;color:{INK}">Tide chart &#183; commits &amp; contributions</span><span class="mono" style="font-size:11px">{ncols} WEEKS &#8594; TODAY</span></div>
-  <div class="marker" style="font-size:15px;color:{INK};margin-top:-4px">each dot = one day &#183; darker dot = busier day &#183; the yellow box walks through the year &#8594;</div>
   <style>{tour_css}</style>
   <div style="position:relative;width:{cw}px;height:{plot_h:.0f}px">
     <svg {SVGNS} style="position:absolute;left:0;top:{TIP}px" width="{cw}" height="{CH}" viewBox="0 0 {cw} {CH}" fill="none">
@@ -494,9 +493,9 @@ def build_stats(data):
       <circle class="pulse-ring" cx="{pk_x:.1f}" cy="{pk_y:.1f}" r="5" fill="{SUN}" stroke="{NAVY}" stroke-width="2"/>
       <text x="{pk_x + pk_dx:.1f}" y="{max(pk_y - 2, 12):.1f}" text-anchor="{pk_anchor}" font-family="Mono" font-weight="700" font-size="10.5" fill="{NAVY}">{pk_label}</text>
     </svg>
-    {labels}{wk}{dots}{callouts}{tour}
+    {labels}{dots}{tour}
   </div>
-  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>ringed = your 3 busiest days &#183; top: {fmt(best_day[0])} with {best_day[1]} contributions</div>
+  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>busiest day &#183; {fmt(best_day[0])} &#183; {best_day[1]} contributions</div>
   <div class="mono" style="display:flex;gap:18px;font-size:11px;align-items:center">
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:3px;background:{INK}"></span>contributions / week</span>
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:2px dashed {ORANGE}"></span>commits / week</span>
@@ -567,7 +566,7 @@ def build_button(name, label, bg, fg, border):
 
 TOP_H = 1292
 PROJECTS_H = 448
-STATS_H = 840
+STATS_H = 810
 LEARNING_H = 330
 
 # ================================================================== data ===
