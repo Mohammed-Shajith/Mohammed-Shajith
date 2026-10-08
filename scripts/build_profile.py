@@ -340,17 +340,22 @@ def build_stats(data):
     # partial first/last weeks are scaled to a 7-day rate so the line doesn't dip at the edges
     contrib_week = [sum(w) * 7 / len(w) for w in weeks]
     commit_week = [v * 7 / len(w) for v, w in zip(data["commit_weeks"], weeks)]
-    cw = 788
+    cw = 758                      # inner width of the tide card
     ncols = len(weeks)
-    colw = (cw - 3 * (ncols - 1)) / ncols
-    xs = [i * (colw + 3) + colw / 2 for i in range(ncols)]  # line points sit above their dot column
+    LW = 30                       # weekday label column
+    pitch = (cw - LW) / ncols     # one dot column
+    dot = pitch - 3
+    TIP, CH, MR = 50, 112, 18     # tooltip strip, chart height, month-label row
+    gy = TIP + CH + MR            # top of the dot grid
+    plot_h = gy + 7 * pitch
+    xs = [LW + i * pitch + dot / 2 for i in range(ncols)]  # line points sit above their dot column
     peak = max(max(contrib_week), max(commit_week), 1)
     scaled_c = [v / peak for v in contrib_week]
     scaled_m = [v / peak for v in commit_week]
 
     # both lines share one scale
     def scaled_path(vals):
-        pts = [(xs[i], 104 - v * 88) for i, v in enumerate(vals)]
+        pts = [(xs[i], CH - 8 - v * 88) for i, v in enumerate(vals)]
         d = f"M{pts[0][0]:.1f} {pts[0][1]:.1f}"
         for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
             mx = (x0 + x1) / 2
@@ -358,21 +363,15 @@ def build_stats(data):
         return d
     line = scaled_path(scaled_c)
     line2 = scaled_path(scaled_m)
-    area = line + f" L{xs[-1]:.1f} 112 L{xs[0]:.1f} 112 Z"
+    area = line + f" L{xs[-1]:.1f} {CH} L{xs[0]:.1f} {CH} Z"
     pk = max(range(ncols), key=lambda i: contrib_week[i])
-    pk_x, pk_y = xs[pk], 104 - scaled_c[pk] * 88
+    pk_x, pk_y = xs[pk], CH - 8 - scaled_c[pk] * 88
     pk_anchor = "end" if pk_x > cw - 140 else "start"
     pk_dx = -10 if pk_anchor == "end" else 10
     pk_label = f"peak week &#183; {round(contrib_week[pk])}"
     flat = [(d, c) for w in days for d, c in w]
     best_day = max(flat, key=lambda t: t[1])
     fmt = lambda iso: dt.date.fromisoformat(iso).strftime("%d %b %Y")
-    months, last = [], None
-    for i, w in enumerate(days):
-        m = w[0][0][:7]
-        if m != last and (i > 0 or w[0][0][8:] <= "07"):
-            months.append((i, dt.date.fromisoformat(w[0][0]).strftime("%b")))
-        last = m
 
     # shade by quartiles of the distinct daily counts, so quiet 1-commit days and busy days look different
     levels = sorted({c for w in weeks for c in w if c > 0}) or [1]
@@ -385,22 +384,77 @@ def build_stats(data):
             return shades[0]
         return shades[1 + sum(c > t for t in cuts)]
 
-    # place each day on its real weekday row (Sun..Sat), like GitHub's calendar
-    grid = [[None] * ncols for _ in range(7)]
+    pos = {}  # date -> (x, y) top-left of its dot, on its real weekday row (Sun..Sat)
     for c, w in enumerate(days):
         for d, v in w:
-            grid[(dt.date.fromisoformat(d).weekday() + 1) % 7][c] = (d, v)
-    cells = []
-    for r in range(7):
-        for c in range(ncols):
-            cell = grid[r][c]
-            if cell is None:
-                cells.append('<span></span>')
-                continue
-            ring = f";box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}" if cell == best_day else ""
-            cells.append(f'<span style="width:100%;aspect-ratio:1/1;border-radius:50%;background:{shade(cell[1])}{ring}"></span>')
-    month_row = "".join(f'<span style="grid-column:{i + 1} / span 4;font-size:10px">{m.upper()}</span>' for i, m in months)
+            r = (dt.date.fromisoformat(d).weekday() + 1) % 7
+            pos[d] = (LW + c * pitch, gy + r * pitch)
+    top3 = []  # three busiest days, spread out so their labels don't collide
+    for d, v in sorted(flat, key=lambda t: -t[1]):
+        if v > 0 and all(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(o)).days) > 21 for o, _ in top3):
+            top3.append((d, v))
+        if len(top3) == 3:
+            break
+    top3_dates = {d for d, _ in top3}
+    dots = "".join(
+        f'<span style="position:absolute;left:{pos[d][0]:.1f}px;top:{pos[d][1]:.1f}px;width:{dot:.1f}px;height:{dot:.1f}px;'
+        f'border-radius:50%;background:{shade(v)}'
+        + (f';box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}' if d in top3_dates else '') + '"></span>'
+        for d, v in flat)
+    wk = "".join(f'<span class="mono" style="position:absolute;left:0;top:{gy + r * pitch - 1:.1f}px;font-size:9.5px;line-height:{dot:.0f}px">{n}</span>'
+                 for r, n in ((1, "MON"), (3, "WED"), (5, "FRI")))
 
+    # A: handwritten callouts on the three busiest days
+    callouts = ""
+    for rank, (d, v) in enumerate(top3):
+        x, y = pos[d]
+        left_side = x > cw - 90
+        bx = x - 46 if left_side else x + dot + 8
+        by = y - 20
+        lx1, lx2 = (x - 2, bx + 38) if left_side else (x + dot + 1, bx + 2)
+        callouts += (f'<svg {SVGNS} style="position:absolute;left:0;top:0" width="{cw}" height="{plot_h:.0f}" fill="none">'
+                     f'<path d="M{lx1:.1f} {y + dot / 2:.1f} Q {(lx1 + lx2) / 2:.1f} {by + 4:.1f} {lx2:.1f} {by + 9:.1f}" stroke="{ORANGE}" stroke-width="1.6"/></svg>'
+                     f'<span class="marker" style="position:absolute;left:{bx:.1f}px;top:{by:.1f}px;font-size:13px;line-height:1;padding:3px 7px;'
+                     f'background:{SUN};border:1.5px solid {NAVY};border-radius:10px;transform:rotate({(-4, 3, -2)[rank]}deg);white-space:nowrap">{v}</span>')
+
+    # B: a self-running "hover" that tours the year, one month at a time
+    month_cols = {}
+    for c, w in enumerate(days):
+        month_cols.setdefault(w[0][0][:7], []).append(c)
+    month_days = {}
+    for d, v in flat:
+        month_days.setdefault(d[:7], []).append((d, v))
+    tour_months = [m for m in sorted(month_cols) if m in month_days]
+    n_m = len(tour_months)
+    slot = 2.4
+    total = n_m * slot
+    vis = 100 / n_m
+    tour = ""
+    labels = ""
+    for i, m in enumerate(tour_months):
+        cols = month_cols[m]
+        x0 = LW + cols[0] * pitch - 3
+        wband = len(cols) * pitch + 3
+        md = month_days[m]
+        tot = sum(v for _, v in md)
+        active = sum(1 for _, v in md if v > 0)
+        bd, bv = max(md, key=lambda t: t[1])
+        name = dt.date.fromisoformat(m + "-01").strftime("%b %Y").upper()
+        tw = 330
+        tx = min(max(x0 + wband / 2 - tw / 2, 0), cw - tw)
+        ax = x0 + wband / 2 - tx
+        tour += (f'<div class="tour" style="animation-delay:{i * slot:.1f}s">'
+                 f'<div style="position:absolute;left:{x0:.1f}px;top:{TIP - 4}px;width:{wband:.1f}px;height:{plot_h - TIP + 7:.1f}px;'
+                 f'border:2px dashed {INK};border-radius:10px;background:rgba(255,210,31,0.22)"></div>'
+                 f'<div class="mono" style="position:absolute;left:{tx:.1f}px;top:0;width:{tw}px;padding:7px 10px;border-radius:10px;'
+                 f'background:{NAVY};color:{CREAM};font-size:10.5px;line-height:1.45;text-align:center">'
+                 f'<span style="color:{SUN}">{name}</span> &#183; {tot} contributions &#183; {active} active days<br/>'
+                 f'busiest: {dt.date.fromisoformat(bd).day} {dt.date.fromisoformat(bd).strftime("%b")} ({bv})'
+                 f'<span style="position:absolute;left:{ax - 6:.1f}px;bottom:-6px;width:12px;height:12px;background:{NAVY};transform:rotate(45deg)"></span></div></div>')
+        if len(cols) >= 2:
+            labels += f'<span class="mono" style="position:absolute;left:{LW + cols[0] * pitch:.1f}px;top:{TIP + CH + 3}px;font-size:10px;color:{INK}">{name[:3]}</span>'
+    tour_css = (f"@keyframes tour{{0%{{opacity:0}}0.6%{{opacity:1}}{vis - 0.6:.2f}%{{opacity:1}}{vis:.2f}%,100%{{opacity:0}}}}"
+                f".tour{{opacity:0;animation:tour {total:.1f}s linear infinite}}")
     updated = data["updated"]
     body = f"""
 <div style="padding:30px 36px 20px;display:grid;grid-template-columns:1fr 1fr;gap:34px;position:relative">
@@ -429,17 +483,20 @@ def build_stats(data):
 </div>
 <div style="margin:6px 36px 0;border:2.5px solid {NAVY};border-radius:28px 20px 34px 22px;background:{CREAM};padding:20px 22px;display:flex;flex-direction:column;gap:12px;position:relative">
   <div style="display:flex;justify-content:space-between;align-items:center"><span class="anton" style="font-size:24px;color:{INK}">Tide chart &#183; commits &amp; contributions</span><span class="mono" style="font-size:11px">{ncols} WEEKS &#8594; TODAY</span></div>
-  <svg {SVGNS} width="{cw}" height="112" viewBox="0 0 {cw} 112" fill="none">
-    <path d="{area}" fill="{INK}" opacity="0.16"/>
-    <path d="{line}" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
-    <path class="march" d="{line2}" stroke="{ORANGE}" stroke-width="2.2" stroke-dasharray="5 5"/>
-    <line x1="{pk_x:.1f}" y1="{pk_y:.1f}" x2="{pk_x:.1f}" y2="112" stroke="{NAVY}" stroke-width="1" stroke-dasharray="2 3"/>
-    <circle class="pulse-ring" cx="{pk_x:.1f}" cy="{pk_y:.1f}" r="5" fill="{SUN}" stroke="{NAVY}" stroke-width="2"/>
-    <text x="{pk_x + pk_dx:.1f}" y="{max(pk_y - 2, 12):.1f}" text-anchor="{pk_anchor}" font-family="Mono" font-weight="700" font-size="10.5" fill="{NAVY}">{pk_label}</text>
-  </svg>
-  <div class="mono" style="display:grid;grid-template-columns:repeat({ncols},minmax(0,1fr));gap:3px;color:{INK};margin-bottom:-4px">{month_row}</div>
-  <div style="display:grid;grid-template-columns:repeat({ncols},minmax(0,1fr));gap:3px">{''.join(cells)}</div>
-  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>busiest day &#183; {fmt(best_day[0])} &#183; {best_day[1]} contributions</div>
+  <div class="marker" style="font-size:15px;color:{INK};margin-top:-4px">each dot = one day &#183; darker dot = busier day &#183; the yellow box walks through the year &#8594;</div>
+  <style>{tour_css}</style>
+  <div style="position:relative;width:{cw}px;height:{plot_h:.0f}px">
+    <svg {SVGNS} style="position:absolute;left:0;top:{TIP}px" width="{cw}" height="{CH}" viewBox="0 0 {cw} {CH}" fill="none">
+      <path d="{area}" fill="{INK}" opacity="0.16"/>
+      <path d="{line}" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path class="march" d="{line2}" stroke="{ORANGE}" stroke-width="2.2" stroke-dasharray="5 5"/>
+      <line x1="{pk_x:.1f}" y1="{pk_y:.1f}" x2="{pk_x:.1f}" y2="{CH}" stroke="{NAVY}" stroke-width="1" stroke-dasharray="2 3"/>
+      <circle class="pulse-ring" cx="{pk_x:.1f}" cy="{pk_y:.1f}" r="5" fill="{SUN}" stroke="{NAVY}" stroke-width="2"/>
+      <text x="{pk_x + pk_dx:.1f}" y="{max(pk_y - 2, 12):.1f}" text-anchor="{pk_anchor}" font-family="Mono" font-weight="700" font-size="10.5" fill="{NAVY}">{pk_label}</text>
+    </svg>
+    {labels}{wk}{dots}{callouts}{tour}
+  </div>
+  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>ringed = your 3 busiest days &#183; top: {fmt(best_day[0])} with {best_day[1]} contributions</div>
   <div class="mono" style="display:flex;gap:18px;font-size:11px;align-items:center">
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:3px;background:{INK}"></span>contributions / week</span>
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:2px dashed {ORANGE}"></span>commits / week</span>
@@ -510,7 +567,7 @@ def build_button(name, label, bg, fg, border):
 
 TOP_H = 1292
 PROJECTS_H = 448
-STATS_H = 776
+STATS_H = 840
 LEARNING_H = 330
 
 # ================================================================== data ===
