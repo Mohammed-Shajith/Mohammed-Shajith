@@ -315,9 +315,10 @@ def build_stats(data):
     line2 = scaled_path(scaled_m)
     area = line + f" L{cw} 112 L0 112 Z"
 
-    nonzero = sorted(c for w in weeks for c in w if c > 0)
-    q = lambda p: nonzero[min(len(nonzero) - 1, int(p * len(nonzero)))] if nonzero else 1
-    cuts = [q(0.25), q(0.5), q(0.75)]
+    # shade by quartiles of the distinct daily counts, so quiet 1-commit days and busy days look different
+    levels = sorted({c for w in weeks for c in w if c > 0}) or [1]
+    q = lambda p: levels[min(len(levels) - 1, int(p * len(levels)))]
+    cuts = [q(0.25), q(0.5), q(0.75)] if len(levels) >= 4 else levels[:-1] + [10 ** 9] * (4 - len(levels))
     shades = ["#E7E0C8", "#B9C3F0", "#7D8FE6", "#3D57D4", INK]
 
     def shade(c):
@@ -437,10 +438,14 @@ LEARNING_H = 330
 QUERY_YEAR = """query($login:String!,$from:DateTime!,$to:DateTime!){user(login:$login){
 contributionsCollection(from:$from,to:$to){contributionCalendar{weeks{contributionDays{date contributionCount}}}}}}"""
 
+QUERY_COMMITS = """query($login:String!,$from:DateTime!,$to:DateTime!){user(login:$login){
+contributionsCollection(from:$from,to:$to){commitContributionsByRepository(maxRepositories:100){
+contributions(first:100){nodes{occurredAt commitCount}}}}}}"""
+
 QUERY_MAIN = """query($login:String!){user(login:$login){createdAt
 contributionsCollection{totalCommitContributions restrictedContributionsCount totalPullRequestContributions
 contributionCalendar{totalContributions weeks{contributionDays{date contributionCount}}}
-commitContributionsByRepository(maxRepositories:100){contributions(first:100){nodes{occurredAt commitCount}}}}
+}
 repositories(ownerAffiliations:OWNER,isFork:false,first:100){nodes{languages(first:10,orderBy:{field:SIZE,direction:DESC}){edges{size node{name}}}}}}}"""
 
 
@@ -479,14 +484,22 @@ def fetch_live(token):
     weeks = [[d["contributionCount"] for d in w["contributionDays"]] for w in cc["contributionCalendar"]["weeks"]]
     week_starts = [w["contributionDays"][0]["date"] for w in cc["contributionCalendar"]["weeks"]]
 
+    # commits per week, fetched month by month so no repo hits the 100-day page limit
     commit_weeks = [0] * len(weeks)
-    for repo in cc["commitContributionsByRepository"]:
-        for n in repo["contributions"]["nodes"]:
-            day = n["occurredAt"][:10]
-            for i in range(len(week_starts) - 1, -1, -1):
-                if day >= week_starts[i]:
-                    commit_weeks[i] += n["commitCount"]
-                    break
+    start = dt.datetime.fromisoformat(week_starts[0]).replace(tzinfo=dt.timezone.utc)
+    end = dt.datetime.now(dt.timezone.utc)
+    while start < end:
+        stop = min(start + dt.timedelta(days=28), end)
+        m = gql(token, QUERY_COMMITS, {"login": LOGIN, "from": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                       "to": stop.strftime("%Y-%m-%dT%H:%M:%SZ")})
+        for repo in m["contributionsCollection"]["commitContributionsByRepository"]:
+            for n in repo["contributions"]["nodes"]:
+                day = n["occurredAt"][:10]
+                for i in range(len(week_starts) - 1, -1, -1):
+                    if day >= week_starts[i]:
+                        commit_weeks[i] += n["commitCount"]
+                        break
+        start = stop
 
     # streaks across every year since the account was created
     all_days = {}
