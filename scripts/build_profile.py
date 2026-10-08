@@ -463,14 +463,18 @@ def build_stats(data):
             break
         if all(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(o)).days) > 24 for o, _ in flex_days):
             flex_days.append((d, v))
-    arm = (f'<svg {SVGNS} width="24" height="24" viewBox="0 0 32 32" fill="none" stroke-linecap="round">'
-           f'<path d="M4 25 H19" stroke="{SUN}" stroke-width="7"/>'
-           f'<ellipse class="bicep" cx="12" cy="20.5" rx="6.5" ry="4.5" fill="{SUN}"/>'
-           f'<g class="forearm"><path d="M19 25 L22 10" stroke="{SUN}" stroke-width="6"/><circle cx="22.5" cy="7.5" r="4.6" fill="{SUN}"/></g></svg>')
+    arm = (f'<svg {SVGNS} width="30" height="30" viewBox="0 0 40 40" fill="none" stroke-linecap="round" style="overflow:visible">'
+           f'<g class="shake">'
+           f'<g class="pow" stroke="{ORANGE}" stroke-width="2.4"><path d="M10 13 L7 8"/><path d="M15 11 L15 5"/><path d="M20 13 L23 8"/></g>'
+           f'<path d="M3 31 H23" stroke="{SUN}" stroke-width="9"/>'
+           f'<ellipse class="bicep" cx="14" cy="25" rx="8.5" ry="6.5" fill="{SUN}"/>'
+           f'<g class="forearm"><path d="M23 31 L27 13" stroke="{SUN}" stroke-width="8"/>'
+           f'<rect x="21" y="3" width="12" height="11" rx="4.5" fill="{SUN}"/>'
+           f'<path d="M24 8 H30" stroke="{NAVY}" stroke-width="1.4"/></g></g></svg>')
     flexers = ""
     for k, (d, v) in enumerate(flex_days):
         x, y = pos[d]
-        bw, bh = 50, 30
+        bw, bh = 58, 36
         bx = min(max(x + dot / 2 - bw / 2, 0), cw - bw)
         by = y - bh - 7
         day = dt.date.fromisoformat(d)
@@ -483,17 +487,22 @@ def build_stats(data):
                     f'<div style="position:absolute;inset:0;border-radius:14px;background:{NAVY};box-shadow:2px 2px 0 {ORANGE}"></div>'
                     f'<span style="position:absolute;left:{x + dot / 2 - bx - 5:.1f}px;bottom:-5px;width:10px;height:10px;background:{NAVY};transform:rotate(45deg)"></span>'
                     + layer("fx-a", arm)
-                    + layer("fx-b mono", f'<span style="color:{CREAM};font-size:11px">{day.day} {day.strftime("%b")}</span>')
-                    + layer("fx-c anton", f'<span style="color:{SUN};font-size:20px;line-height:1">{v}</span>')
+                    + layer("fx-b mono", f'<span style="color:{CREAM};font-size:12px">{day.day} {day.strftime("%b")}</span>')
+                    + layer("fx-c anton", f'<span style="color:{SUN};font-size:24px;line-height:1">{v}</span>')
                     + '</div>')
-    flex_css = ("@keyframes fxa{0%,30%{opacity:1}36%,94%{opacity:0}100%{opacity:1}}"
-                "@keyframes fxb{0%,30%{opacity:0}36%,63%{opacity:1}69%,100%{opacity:0}}"
-                "@keyframes fxc{0%,63%{opacity:0}69%,94%{opacity:1}100%{opacity:0}}"
+    flex_css = (".fx-b,.fx-c{opacity:0}"
+                "@keyframes fxa{0%,30%{opacity:1}35%,95%{opacity:0}100%{opacity:1}}"
+                "@keyframes fxb{0%,33%{opacity:0}38%,62%{opacity:1}67%,100%{opacity:0}}"
+                "@keyframes fxc{0%,65%{opacity:0}70%,92%{opacity:1}97%,100%{opacity:0}}"
                 ".fx-a{animation:fxa 6s infinite}.fx-b{animation:fxb 6s infinite}.fx-c{animation:fxc 6s infinite}"
-                "@keyframes flexarm{0%,100%{transform:rotate(28deg)}50%{transform:rotate(-14deg)}}"
-                ".forearm{transform-origin:19px 25px;animation:flexarm .8s ease-in-out infinite}"
-                "@keyframes bulge{0%,100%{transform:scale(.75)}50%{transform:scale(1.18)}}"
-                ".bicep{transform-origin:12px 21px;transform-box:view-box;animation:bulge .8s ease-in-out infinite}"
+                "@keyframes curl{0%,100%{transform:rotate(30deg)}45%,60%{transform:rotate(-10deg)}}"
+                ".forearm{transform-origin:23px 31px;animation:curl 1s ease-in-out infinite}"
+                "@keyframes bulge{0%,100%{transform:scale(.7,.7)}45%,60%{transform:scale(1.3,1.35)}}"
+                ".bicep{transform-origin:14px 31px;animation:bulge 1s ease-in-out infinite}"
+                "@keyframes pow{0%,35%,75%,100%{opacity:0;transform:scale(.6)}50%,60%{opacity:1;transform:scale(1)}}"
+                ".pow{transform-origin:15px 14px;animation:pow 1s ease-in-out infinite}"
+                "@keyframes shake{0%,40%,70%,100%{transform:translate(0,0)}47%{transform:translate(-1px,0)}53%{transform:translate(1px,0)}58%{transform:translate(-1px,0)}}"
+                ".shake{animation:shake 1s linear infinite}"
                 "@keyframes pop{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}"
                 ".flexpop{animation:pop 1.6s ease-in-out infinite}")
 
