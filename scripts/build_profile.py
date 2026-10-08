@@ -317,8 +317,8 @@ def build_projects():
       <span class="chip" style="position:absolute;top:-12px;right:16px;background:{SUN};color:{NAVY};transform:rotate(3deg)">[03]</span>
       <svg {SVGNS} width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="{INK}" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l10 5-10 5L2 7z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>
       <div class="anton" style="font-size:26px;letter-spacing:.5px;text-transform:none">exsy</div>
-      <div style="font-size:13.5px;line-height:1.5">A personal productivity and automation platform.</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">{tags(["React Native", "FastAPI", "AI tools"], f"border:1.5px solid {NAVY}")}</div>
+      <div style="font-size:13.5px;line-height:1.5">A privacy-first UPI expense tracker.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">{tags(["Flutter", "FastAPI", "Python"], f"border:1.5px solid {NAVY}")}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:auto"><span class="chip" style="background:{INK};color:{CREAM}">BUILDING<span class="blink">...</span></span>
         <svg {SVGNS} width="100" height="12" viewBox="0 0 100 12" fill="none"><path d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#E3DCC5" stroke-width="4" stroke-linecap="round"/><path class="fillbar" style="--to:{done:.0f}px" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="{INK}" stroke-width="4" stroke-linecap="round" stroke-dasharray="{done:.0f} 999"/><path class="flow" d="M2 6 C 12 0, 22 12, 32 6 S 52 0, 62 6 S 82 12, 98 6" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 21"/></svg>
         <span class="mono" style="font-size:11px">{EXSY_PROGRESS * 100:.0f}%</span></div>
@@ -389,34 +389,11 @@ def build_stats(data):
         for d, v in w:
             r = (dt.date.fromisoformat(d).weekday() + 1) % 7
             pos[d] = (LW + c * pitch, gy + r * pitch)
-    top3 = []  # three busiest days, spread out so their labels don't collide
-    for d, v in sorted(flat, key=lambda t: -t[1]):
-        if v > 0 and all(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(o)).days) > 21 for o, _ in top3):
-            top3.append((d, v))
-        if len(top3) == 3:
-            break
-    top3_dates = {d for d, _ in top3}
     dots = "".join(
         f'<span style="position:absolute;left:{pos[d][0]:.1f}px;top:{pos[d][1]:.1f}px;width:{dot:.1f}px;height:{dot:.1f}px;'
         f'border-radius:50%;background:{shade(v)}'
         + (f';box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}' if (d, v) == best_day else '') + '"></span>'
         for d, v in flat)
-    wk = "".join(f'<span class="mono" style="position:absolute;left:0;top:{gy + r * pitch - 1:.1f}px;font-size:9.5px;line-height:{dot:.0f}px">{n}</span>'
-                 for r, n in ((1, "MON"), (3, "WED"), (5, "FRI")))
-
-    # A: handwritten callouts on the three busiest days
-    callouts = ""
-    for rank, (d, v) in enumerate(top3):
-        x, y = pos[d]
-        left_side = x > cw - 90
-        bx = x - 46 if left_side else x + dot + 8
-        by = y - 20
-        lx1, lx2 = (x - 2, bx + 38) if left_side else (x + dot + 1, bx + 2)
-        callouts += (f'<svg {SVGNS} style="position:absolute;left:0;top:0" width="{cw}" height="{plot_h:.0f}" fill="none">'
-                     f'<path d="M{lx1:.1f} {y + dot / 2:.1f} Q {(lx1 + lx2) / 2:.1f} {by + 4:.1f} {lx2:.1f} {by + 9:.1f}" stroke="{ORANGE}" stroke-width="1.6"/></svg>'
-                     f'<span class="marker" style="position:absolute;left:{bx:.1f}px;top:{by:.1f}px;font-size:13px;line-height:1;padding:3px 7px;'
-                     f'background:{SUN};border:1.5px solid {NAVY};border-radius:10px;transform:rotate({(-4, 3, -2)[rank]}deg);white-space:nowrap">{v}</span>')
-
     # B: a self-running "hover" that tours the year, one month at a time
     month_cols = {}
     for c, w in enumerate(days):
@@ -483,9 +460,9 @@ def build_stats(data):
     arm = (f'<svg {SVGNS} width="34" height="34" viewBox="10 10 90 90" overflow="visible">'
            f'<g transform="translate(110 0) scale(-1 1)"><g class="tense">'
            f'<g class="pow" stroke="{ORANGE}" stroke-width="5" stroke-linecap="round"><path d="M27 47 L23 41"/><path d="M34 45 L34 37"/><path d="M41 47 L44 41"/></g>'
-           f'<path d="{fill_shape}" fill="{SUN}"/>'
+           f'<path d="{fill_shape}" fill="{CREAM}"/>'
            f'<path d="{outer}" stroke="{NAVY}" {lw}/><path d="{thumb}" stroke="{NAVY}" {lw}/><path d="{upper}" stroke="{NAVY}" {lw}/>'
-           f'<g class="bicep"><path d="{bicep}" fill="{SUN}" stroke="{NAVY}" {lw.replace('fill="none"', "")}/><path d="{under}" stroke="{NAVY}" {lw}/></g>'
+           f'<g class="bicep"><path d="{bicep}" fill="{CREAM}" stroke="{NAVY}" {lw.replace('fill="none"', "")}/><path d="{under}" stroke="{NAVY}" {lw}/></g>'
            f'</g></g></svg>')
     flexers = ""
     for k, (d, v) in enumerate(flex_days):
@@ -772,6 +749,7 @@ def main():
     build_button("instagram", "Instagram", CREAM, NAVY, NAVY)
     build_button("email", "Email", CREAM, NAVY, NAVY)
     build_button("repos", "View all repos", SUN, NAVY, NAVY)
+    build_button("exsy", "exsy repo", INK, CREAM, INK)
     print("built:", ", ".join(sorted(p.name for p in ASSETS.glob("*.svg"))))
 
 
