@@ -483,9 +483,9 @@ def build_stats(data):
     arm = (f'<svg {SVGNS} width="34" height="34" viewBox="10 10 90 90" overflow="visible">'
            f'<g transform="translate(110 0) scale(-1 1)"><g class="tense">'
            f'<g class="pow" stroke="{ORANGE}" stroke-width="5" stroke-linecap="round"><path d="M27 47 L23 41"/><path d="M34 45 L34 37"/><path d="M41 47 L44 41"/></g>'
-           f'<path d="{fill_shape}" fill="{CREAM}"/>'
+           f'<path d="{fill_shape}" fill="{SUN}"/>'
            f'<path d="{outer}" stroke="{NAVY}" {lw}/><path d="{thumb}" stroke="{NAVY}" {lw}/><path d="{upper}" stroke="{NAVY}" {lw}/>'
-           f'<g class="bicep"><path d="{bicep}" fill="{CREAM}" stroke="{NAVY}" {lw.replace('fill="none"', "")}/><path d="{under}" stroke="{NAVY}" {lw}/></g>'
+           f'<g class="bicep"><path d="{bicep}" fill="{SUN}" stroke="{NAVY}" {lw.replace('fill="none"', "")}/><path d="{under}" stroke="{NAVY}" {lw}/></g>'
            f'</g></g></svg>')
     flexers = ""
     for k, (d, v) in enumerate(flex_days):
