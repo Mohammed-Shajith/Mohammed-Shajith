@@ -463,32 +463,41 @@ def build_stats(data):
             break
         if all(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(o)).days) > 24 for o, _ in flex_days):
             flex_days.append((d, v))
-    arm = (f'<svg {SVGNS} width="30" height="30" viewBox="0 0 40 40" fill="none" stroke-linecap="round" style="overflow:visible">'
-           f'<g class="shake">'
-           f'<g class="pow" stroke="{ORANGE}" stroke-width="2.4"><path d="M10 13 L7 8"/><path d="M15 11 L15 5"/><path d="M20 13 L23 8"/></g>'
-           f'<path d="M3 31 H23" stroke="{SUN}" stroke-width="9"/>'
-           f'<ellipse class="bicep" cx="14" cy="25" rx="8.5" ry="6.5" fill="{SUN}"/>'
-           f'<g class="forearm"><path d="M23 31 L27 13" stroke="{SUN}" stroke-width="8"/>'
-           f'<rect x="21" y="3" width="12" height="11" rx="4.5" fill="{SUN}"/>'
-           f'<path d="M24 8 H30" stroke="{NAVY}" stroke-width="1.4"/></g></g></svg>')
+    ARM = "#F26A1B"
+    # a right arm flexing: drawn facing right, then mirrored so the fist sits on the viewer's left like a real right-arm flex
+    ol = f'stroke="{NAVY}" stroke-width="1.4"'
+    knuckles = "".join(f'<circle cx="21.6" cy="{y}" r="2.1" fill="{ARM}" {ol}/>' for y in (7.2, 10.2, 13.2, 16.0))
+    arm = (f'<svg {SVGNS} width="34" height="34" viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round" style="overflow:visible">'
+           f'<g transform="translate(40 0) scale(-1 1)"><g class="shake">'
+           f'<g class="pow" stroke="{NAVY}" stroke-width="2"><path d="M8 13 L5 8.5"/><path d="M13 11.5 L13 5.5"/><path d="M18 13 L21 8.5"/></g>'
+           f'<path d="M2 24.5 L22 24.5 Q27 24.5 27 30 Q27 35.5 22 35.5 L2 35.5" fill="{ARM}" {ol}/>'
+           f'<ellipse class="bicep" cx="12.5" cy="24.5" rx="8" ry="6" fill="{ARM}" {ol}/>'
+           f'<g class="forearm">'
+           f'<path d="M20 32 L23.5 16 L31.5 16 L28.5 32 Z" fill="{ARM}" {ol}/>'
+           f'<rect x="22" y="5" width="12" height="13" rx="3.6" fill="{ARM}" {ol}/>{knuckles}'
+           f'<path d="M23.5 17 Q 28 18.5 32.5 14.5" {ol}/>'
+           f'</g></g></g></svg>')
     flexers = ""
     for k, (d, v) in enumerate(flex_days):
         x, y = pos[d]
-        bw, bh = 58, 36
-        bx = min(max(x + dot / 2 - bw / 2, 0), cw - bw)
-        by = y - bh - 7
+        cx = x + dot / 2
+        aw, ah = 40, 34
+        ax = min(max(cx - aw / 2, 0), cw - aw)
+        below = (y - gy) / pitch < 2.5  # top rows: hang the arm below the dot so it never covers the month labels
+        ay = y + dot + 12 if below else y - ah - 12
         day = dt.date.fromisoformat(d)
         delay = -k * 1.7
         layer = lambda cls, inner: (f'<span class="{cls}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;'
                                     f'animation-delay:{delay:.1f}s">{inner}</span>')
+        halo = f"text-shadow:0 0 3px {CREAM},0 0 3px {CREAM},0 0 6px {CREAM}"
         flexers += (f'<span style="position:absolute;left:{x - 2:.1f}px;top:{y - 2:.1f}px;width:{dot + 4:.1f}px;height:{dot + 4:.1f}px;border-radius:50%;'
                     f'border:2px solid {ORANGE}"></span>'
-                    f'<div class="flexpop" style="position:absolute;left:{bx:.1f}px;top:{by:.1f}px;width:{bw}px;height:{bh}px;animation-delay:{delay:.1f}s">'
-                    f'<div style="position:absolute;inset:0;border-radius:14px;background:{NAVY};box-shadow:2px 2px 0 {ORANGE}"></div>'
-                    f'<span style="position:absolute;left:{x + dot / 2 - bx - 5:.1f}px;bottom:-5px;width:10px;height:10px;background:{NAVY};transform:rotate(45deg)"></span>'
+                    + (f'<span style="position:absolute;left:{cx - 0.6:.1f}px;top:{y + dot:.1f}px;width:1.2px;height:{ay - (y + dot) + 2:.1f}px;background:{NAVY}"></span>' if below else
+                     f'<span style="position:absolute;left:{cx - 0.6:.1f}px;top:{ay + ah - 2:.1f}px;width:1.2px;height:{y - (ay + ah) + 1:.1f}px;background:{NAVY}"></span>')
+                    + f'<div style="position:absolute;left:{ax:.1f}px;top:{ay:.1f}px;width:{aw}px;height:{ah}px">'
                     + layer("fx-a", arm)
-                    + layer("fx-b mono", f'<span style="color:{CREAM};font-size:12px">{day.day} {day.strftime("%b")}</span>')
-                    + layer("fx-c anton", f'<span style="color:{SUN};font-size:24px;line-height:1">{v}</span>')
+                    + layer("fx-b mono", f'<span style="color:{NAVY};font-size:11.5px;white-space:nowrap;{halo}">{day.day} {day.strftime("%b")}</span>')
+                    + layer("fx-c anton", f'<span style="color:{ORANGE};font-size:26px;line-height:1;{halo}">{v}</span>')
                     + '</div>')
     flex_css = (".fx-b,.fx-c{opacity:0}"
                 "@keyframes fxa{0%,30%{opacity:1}35%,95%{opacity:0}100%{opacity:1}}"
@@ -496,11 +505,11 @@ def build_stats(data):
                 "@keyframes fxc{0%,65%{opacity:0}70%,92%{opacity:1}97%,100%{opacity:0}}"
                 ".fx-a{animation:fxa 6s infinite}.fx-b{animation:fxb 6s infinite}.fx-c{animation:fxc 6s infinite}"
                 "@keyframes curl{0%,100%{transform:rotate(30deg)}45%,60%{transform:rotate(-10deg)}}"
-                ".forearm{transform-origin:23px 31px;animation:curl 1s ease-in-out infinite}"
+                ".forearm{transform-origin:24px 31px;transform-box:view-box;animation:curl 1s ease-in-out infinite}"
                 "@keyframes bulge{0%,100%{transform:scale(.7,.7)}45%,60%{transform:scale(1.3,1.35)}}"
-                ".bicep{transform-origin:14px 31px;animation:bulge 1s ease-in-out infinite}"
+                ".bicep{transform-origin:12.5px 30px;transform-box:view-box;animation:bulge 1s ease-in-out infinite}"
                 "@keyframes pow{0%,35%,75%,100%{opacity:0;transform:scale(.6)}50%,60%{opacity:1;transform:scale(1)}}"
-                ".pow{transform-origin:15px 14px;animation:pow 1s ease-in-out infinite}"
+                ".pow{transform-origin:13px 12px;transform-box:view-box;animation:pow 1s ease-in-out infinite}"
                 "@keyframes shake{0%,40%,70%,100%{transform:translate(0,0)}47%{transform:translate(-1px,0)}53%{transform:translate(1px,0)}58%{transform:translate(-1px,0)}}"
                 ".shake{animation:shake 1s linear infinite}"
                 "@keyframes pop{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}"
