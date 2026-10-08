@@ -15,7 +15,7 @@
 .flow{animation:flow 1.8s linear infinite}
 @keyframes flicker{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.96,1.07) skewX(-3deg)}50%{transform:scale(1.03,.95) skewX(2deg)}75%{transform:scale(.98,1.05) skewX(3deg)}}
 .flicker{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}
-@keyframes cool{0%,100%{transform:rotate(-14deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-2px)}}
+@keyframes cool{0%,100%{transform:rotate(11deg) translateY(0)}50%{transform:rotate(6deg) translateY(-3px)}}
 @keyframes ring{0%,100%{r:5}50%{r:7}}
 .pulse-ring{animation:ring 1.6s ease-in-out infinite}
 .cool{animation:cool 3s ease-in-out infinite}
