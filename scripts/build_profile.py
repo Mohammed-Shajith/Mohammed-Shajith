@@ -91,7 +91,7 @@ BASE_CSS = f"""
 .flow{{animation:flow 1.8s linear infinite}}
 @keyframes flicker{{0%,100%{{transform:scale(1,1) skewX(0)}}25%{{transform:scale(.96,1.07) skewX(-3deg)}}50%{{transform:scale(1.03,.95) skewX(2deg)}}75%{{transform:scale(.98,1.05) skewX(3deg)}}}}
 .flicker{{animation:flicker 1.1s ease-in-out infinite;transform-origin:50% 100%}}
-@keyframes cool{{0%,100%{{transform:rotate(-14deg) translateY(0)}}50%{{transform:rotate(-8deg) translateY(-2px)}}}}
+@keyframes cool{{0%,100%{{transform:rotate(11deg) translateY(0)}}50%{{transform:rotate(6deg) translateY(-3px)}}}}
 @keyframes ring{{0%,100%{{r:5}}50%{{r:7}}}}
 .pulse-ring{{animation:ring 1.6s ease-in-out infinite}}
 .cool{{animation:cool 3s ease-in-out infinite}}
@@ -420,7 +420,7 @@ def build_stats(data):
         <div class="anton" style="font-size:38px;position:relative;z-index:1;text-shadow:0 0 6px {SUN},0 0 2px {SUN}">{data['current_streak']}<span style="font-size:18px"> d</span></div><div class="mono" style="font-size:10.5px">CURRENT<br/>STREAK</div></div>
       <div style="background:{CREAM};border:2.5px solid {NAVY};border-radius:50% 50% 18px 18px;padding:16px 6px 12px;text-align:center;position:relative">
         <div class="anton" style="font-size:38px;color:{INK};position:relative">{data['best_streak']}<span style="font-size:18px"> d</span>
-          <div class="cool" style="position:absolute;left:50%;top:-23px;margin-left:-30px;width:72px;height:24px;z-index:2">{shades_svg(72)}</div></div><div class="mono" style="font-size:10.5px">BEST<br/>STREAK</div></div>
+          <div class="cool" style="position:absolute;left:50%;top:-28px;margin-left:-26px;width:72px;height:24px;z-index:2">{shades_svg(72)}</div></div><div class="mono" style="font-size:10.5px">BEST<br/>STREAK</div></div>
     </div>
     <div class="mono" style="display:flex;justify-content:space-between;font-size:11.5px;border-top:2px solid {NAVY};padding-top:10px">
       <span>CONTRIBS &#183; {data['contributions']}</span><span>PRs &#183; {data['prs']}</span><span>TOP LANG &#183; {data['top_lang']}</span></div>
