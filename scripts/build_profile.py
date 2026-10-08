@@ -453,6 +453,50 @@ def build_stats(data):
                  f'<span style="position:absolute;left:{ax - 6:.1f}px;bottom:-6px;width:12px;height:12px;background:{NAVY};transform:rotate(45deg)"></span></div></div>')
         if len(cols) >= 2:
             labels += f'<span class="mono" style="position:absolute;left:{LW + cols[0] * pitch:.1f}px;top:{TIP + CH + 3}px;font-size:10px;color:{INK}">{name[:3]}</span>'
+    # "flex days": days well above your usual pace get a flexing arm that cycles arm -> date -> count
+    nz = sorted(v for _, v in flat if v > 0)
+    usual = nz[len(nz) // 2] if nz else 1
+    bar = max(usual * 2, nz[int(len(nz) * 0.9)] if nz else 2, 2)
+    flex_days = []
+    for d, v in sorted(flat, key=lambda t: -t[1]):
+        if v < bar or len(flex_days) == 6:
+            break
+        if all(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(o)).days) > 24 for o, _ in flex_days):
+            flex_days.append((d, v))
+    arm = (f'<svg {SVGNS} width="24" height="24" viewBox="0 0 32 32" fill="none" stroke-linecap="round">'
+           f'<path d="M4 25 H19" stroke="{SUN}" stroke-width="7"/>'
+           f'<ellipse class="bicep" cx="12" cy="20.5" rx="6.5" ry="4.5" fill="{SUN}"/>'
+           f'<g class="forearm"><path d="M19 25 L22 10" stroke="{SUN}" stroke-width="6"/><circle cx="22.5" cy="7.5" r="4.6" fill="{SUN}"/></g></svg>')
+    flexers = ""
+    for k, (d, v) in enumerate(flex_days):
+        x, y = pos[d]
+        bw, bh = 50, 30
+        bx = min(max(x + dot / 2 - bw / 2, 0), cw - bw)
+        by = y - bh - 7
+        day = dt.date.fromisoformat(d)
+        delay = -k * 1.7
+        layer = lambda cls, inner: (f'<span class="{cls}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;'
+                                    f'animation-delay:{delay:.1f}s">{inner}</span>')
+        flexers += (f'<span style="position:absolute;left:{x - 2:.1f}px;top:{y - 2:.1f}px;width:{dot + 4:.1f}px;height:{dot + 4:.1f}px;border-radius:50%;'
+                    f'border:2px solid {ORANGE}"></span>'
+                    f'<div class="flexpop" style="position:absolute;left:{bx:.1f}px;top:{by:.1f}px;width:{bw}px;height:{bh}px;animation-delay:{delay:.1f}s">'
+                    f'<div style="position:absolute;inset:0;border-radius:14px;background:{NAVY};box-shadow:2px 2px 0 {ORANGE}"></div>'
+                    f'<span style="position:absolute;left:{x + dot / 2 - bx - 5:.1f}px;bottom:-5px;width:10px;height:10px;background:{NAVY};transform:rotate(45deg)"></span>'
+                    + layer("fx-a", arm)
+                    + layer("fx-b mono", f'<span style="color:{CREAM};font-size:11px">{day.day} {day.strftime("%b")}</span>')
+                    + layer("fx-c anton", f'<span style="color:{SUN};font-size:20px;line-height:1">{v}</span>')
+                    + '</div>')
+    flex_css = ("@keyframes fxa{0%,30%{opacity:1}36%,94%{opacity:0}100%{opacity:1}}"
+                "@keyframes fxb{0%,30%{opacity:0}36%,63%{opacity:1}69%,100%{opacity:0}}"
+                "@keyframes fxc{0%,63%{opacity:0}69%,94%{opacity:1}100%{opacity:0}}"
+                ".fx-a{animation:fxa 6s infinite}.fx-b{animation:fxb 6s infinite}.fx-c{animation:fxc 6s infinite}"
+                "@keyframes flexarm{0%,100%{transform:rotate(28deg)}50%{transform:rotate(-14deg)}}"
+                ".forearm{transform-origin:19px 25px;animation:flexarm .8s ease-in-out infinite}"
+                "@keyframes bulge{0%,100%{transform:scale(.75)}50%{transform:scale(1.18)}}"
+                ".bicep{transform-origin:12px 21px;transform-box:view-box;animation:bulge .8s ease-in-out infinite}"
+                "@keyframes pop{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}"
+                ".flexpop{animation:pop 1.6s ease-in-out infinite}")
+
     tour_css = (f"@keyframes tour{{0%{{opacity:0}}0.6%{{opacity:1}}{vis - 0.6:.2f}%{{opacity:1}}{vis:.2f}%,100%{{opacity:0}}}}"
                 f".tour{{opacity:0;animation:tour {total:.1f}s linear infinite}}")
     updated = data["updated"]
@@ -483,7 +527,7 @@ def build_stats(data):
 </div>
 <div style="margin:6px 36px 0;border:2.5px solid {NAVY};border-radius:28px 20px 34px 22px;background:{CREAM};padding:20px 22px;display:flex;flex-direction:column;gap:12px;position:relative">
   <div style="display:flex;justify-content:space-between;align-items:center"><span class="anton" style="font-size:24px;color:{INK}">Tide chart &#183; commits &amp; contributions</span><span class="mono" style="font-size:11px">{ncols} WEEKS &#8594; TODAY</span></div>
-  <style>{tour_css}</style>
+  <style>{tour_css}{flex_css}</style>
   <div style="position:relative;width:{cw}px;height:{plot_h:.0f}px">
     <svg {SVGNS} style="position:absolute;left:0;top:{TIP}px" width="{cw}" height="{CH}" viewBox="0 0 {cw} {CH}" fill="none">
       <path d="{area}" fill="{INK}" opacity="0.16"/>
@@ -493,9 +537,9 @@ def build_stats(data):
       <circle class="pulse-ring" cx="{pk_x:.1f}" cy="{pk_y:.1f}" r="5" fill="{SUN}" stroke="{NAVY}" stroke-width="2"/>
       <text x="{pk_x + pk_dx:.1f}" y="{max(pk_y - 2, 12):.1f}" text-anchor="{pk_anchor}" font-family="Mono" font-weight="700" font-size="10.5" fill="{NAVY}">{pk_label}</text>
     </svg>
-    {labels}{dots}{tour}
+    {labels}{dots}{tour}{flexers}
   </div>
-  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>busiest day &#183; {fmt(best_day[0])} &#183; {best_day[1]} contributions</div>
+  <div class="mono" style="font-size:11px;display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:{INK};box-shadow:0 0 0 2px {CREAM},0 0 0 3.5px {ORANGE}"></span>busiest day &#183; {fmt(best_day[0])} &#183; {best_day[1]} contributions &#183; the flexing arms mark your above-usual days</div>
   <div class="mono" style="display:flex;gap:18px;font-size:11px;align-items:center">
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;height:3px;background:{INK}"></span>contributions / week</span>
     <span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:2px dashed {ORANGE}"></span>commits / week</span>
