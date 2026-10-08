@@ -63,7 +63,7 @@
     <div class="marker" style="font-size:17px;color:#1530B8;transform:rotate(-2deg)">&#8627; the boards in my quiver</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
-    <div class="sec"><span class="num blob" style="--bg:#FBF6E8;--d:-3.5s">06</span><span class="t">Swell report</span>
+    <div class="sec"><span class="num blob" style="--bg:#FBF6E8;--d:-3.5s">06</span><span class="t">Activity report</span>
       <span class="spin-slow" style="display:inline-block;width:30px;height:30px;margin-bottom:30px"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 54 54" fill="none" stroke="#FF6B1A" stroke-width="4" stroke-linecap="round"><path d="M27 4v46M4 27h46M11 11l32 32M43 11L11 43"/></svg></span></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
       <div style="background:#1530B8;color:#FBF6E8;border-radius:50% 50% 18px 18px;padding:18px 6px 14px;text-align:center"><div class="anton" style="font-size:38px;color:#FFD21F">717</div><div class="mono" style="font-size:10.5px">COMMITS<br/>LAST YEAR</div></div>

@@ -410,7 +410,7 @@ def build_stats(data):
     <div class="marker" style="font-size:17px;color:{INK};transform:rotate(-2deg)">&#8627; the boards in my quiver</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
-    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-3.5s">06</span><span class="t">Swell report</span>
+    <div class="sec"><span class="num blob" style="--bg:{CREAM};--d:-3.5s">06</span><span class="t">Activity report</span>
       <span class="spin-slow" style="display:inline-block;width:30px;height:30px;margin-bottom:30px">{star(ORANGE, 30)}</span></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
       <div style="background:{INK};color:{CREAM};border-radius:50% 50% 18px 18px;padding:18px 6px 14px;text-align:center"><div class="anton" style="font-size:38px;color:{SUN}">{data['commits']}</div><div class="mono" style="font-size:10.5px">COMMITS<br/>LAST YEAR</div></div>
@@ -593,8 +593,8 @@ def fetch_live(token):
             for d in w["contributionDays"]:
                 all_days[d["date"]] = d["contributionCount"]
     today = now.date().isoformat()
-    days = sorted((k, v) for k, v in all_days.items() if k <= today)
-    current, best = streaks(days)
+    history = sorted((k, v) for k, v in all_days.items() if k <= today)
+    current, best = streaks(history)
 
     langs = {}
     for repo in u["repositories"]["nodes"]:
