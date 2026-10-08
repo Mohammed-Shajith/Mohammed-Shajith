@@ -42,5 +42,5 @@ jobs:
             echo "No changes."
           else
             git commit -m "chore: refresh profile stats"
-            git push
+            git pull --rebase -X theirs origin main && git push
           fi
