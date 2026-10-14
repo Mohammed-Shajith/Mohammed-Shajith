@@ -711,7 +711,7 @@ def fetch_live(token):
         "prs": cc["totalPullRequestContributions"],
         "current_streak": current, "best_streak": best, "top_lang": top_lang,
         "days": days, "commit_weeks": commit_weeks,
-        "updated": now.strftime("%d %b %Y, %H:%M UTC"),
+        "updated": now.astimezone(dt.timezone(dt.timedelta(hours=5, minutes=30))).strftime("%d %b %Y, %I:%M %p IST"),
     }
 
 
